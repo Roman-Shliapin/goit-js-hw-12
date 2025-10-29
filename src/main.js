@@ -54,7 +54,7 @@ function handlerSubmit(event) {
           title: 'No results',
           message:
             'Sorry, there are no images matching your search query. Please try again!',
-          timeout: 3000,
+          timeout: 4000,
           position: 'topRight',
         });
         hideLoadMoreButton();
