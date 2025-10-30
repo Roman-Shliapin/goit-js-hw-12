@@ -124,7 +124,7 @@ async function onclick() {
   } catch (error) {
     console.error(error);
   } finally {
-    hideLoader()
+    hideLoader();
   }
 }
   
