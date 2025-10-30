@@ -45,7 +45,6 @@ async function handlerSubmit(event) {
   hideLoadMoreButton();
 
   try {
-    hideLoader();
     const data = await getImagesByQuery(currentQuery, currentPage);
     const { hits, totalHits: total } = data;
     totalHits = total;
@@ -85,7 +84,6 @@ async function onclick() {
   showLoader();
 
   try {
-    hideLoader();
     const data = await getImagesByQuery(currentQuery, currentPage);
     const { hits } = data;
 
