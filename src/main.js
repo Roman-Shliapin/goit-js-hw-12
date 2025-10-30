@@ -13,7 +13,6 @@ import iziToast from 'izitoast';
 // Додатковий імпорт стилів
 import 'izitoast/dist/css/iziToast.min.css';
 
-
 const form = document.querySelector('.form');
 const input = form.querySelector('.form-input');
 const loadMore = document.querySelector('.button');
@@ -24,7 +23,7 @@ let currentPage = 1;
 let totalHits = 0;
 form.addEventListener('submit', handlerSubmit);
 
-function handlerSubmit(event) {
+async function handlerSubmit(event) {
   event.preventDefault();
   const query = input.value.trim();
   if (!query) {
@@ -43,48 +42,54 @@ function handlerSubmit(event) {
   }
 
   showLoader();
+  hideLoadMoreButton();
 
-  getImagesByQuery(currentQuery, currentPage)
-    .then(data => {
-      hideLoader();
-      const { hits, totalHits: total } = data;
-      totalHits = total;
-      if (hits.length === 0) {
-        iziToast.error({
-          title: 'No results',
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-          timeout: 3000,
-          position: 'topRight',
-        });
-        hideLoadMoreButton();
-        return;
-      }
-
-      createGallery(hits);
-      showLoadMoreButton();
-      form.reset();
-    })
-    .catch(error => {
-        console.log(error);
-         iziToast.error({
-        title: 'Error',
-        message: 'Failed to load more images. Please try again later.',
+  try {
+    hideLoader();
+    const data = await getImagesByQuery(currentQuery, currentPage);
+    const { hits, totalHits: total } = data;
+    totalHits = total;
+    if (hits.length === 0) {
+      iziToast.error({
+        title: 'No results',
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
         timeout: 3000,
         position: 'topRight',
       });
+      hideLoadMoreButton();
+      return;
+    }
+    createGallery(hits);
+    if (hits.length < totalHits) {
+      showLoadMoreButton();
+    } else {
+      hideLoadMoreButton();
+    }
+    form.reset();
+  } catch (error) {
+    console.log(error);
+    iziToast.error({
+      title: 'Error',
+      message: 'Failed to load more images. Please try again later.',
+      timeout: 3000,
+      position: 'topRight',
     });
+  } finally {
+    hideLoader();
+  }
 }
 
-function onclick() {
+async function onclick() {
   currentPage += 1;
   showLoader();
 
-  getImagesByQuery(currentQuery, currentPage)
-    .then(data => {
-      hideLoader();
-      const { hits } = data;
-      if (hits.length === 0) {
+  try {
+    hideLoader();
+    const data = await getImagesByQuery(currentQuery, currentPage);
+    const { hits } = data;
+
+    if (hits.length === 0) {
         hideLoadMoreButton();
         iziToast.error({
           title: 'No results',
@@ -95,16 +100,16 @@ function onclick() {
         });
         return;
       }
-      createGallery(hits);
-      const firstCard = document.querySelector('.gallery-item');
-      if (firstCard) {
+
+       createGallery(hits);
+       const firstCard = document.querySelector('.gallery-item');
+       if (firstCard) {
         const cardHeight = firstCard.getBoundingClientRect().height;
         window.scrollBy({
           top: cardHeight * 2,
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       }
-      
 
       const loadedImages = document.querySelectorAll('.gallery-item').length;
       if (loadedImages >= totalHits) {
@@ -116,8 +121,20 @@ function onclick() {
           position: 'topRight',
         });
       }
-    })
-    .catch(error => {
-      console.error(error);
-    });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    hideLoader()
+  }
 }
+  
+   
+      
+      
+      
+    
+      
+
+      
+      
+ 
